@@ -14,16 +14,34 @@ public class DatabaseConnection {
     private static final String USER = "sa";
     private static final String PASS = "12345";
 
-    private static Connection conn = null;
+    // Singleton instance - using volatile for thread safety
+    private static volatile DatabaseConnection instance;
+    private Connection conn = null;
     private static final Logger logger = Logger.getLogger(DatabaseConnection.class.getName());
 
-    public static Connection getConnection() {
-        try {
-            if (conn == null || conn.isClosed()) {
-                Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
-                conn = DriverManager.getConnection(DB_URL, USER, PASS);
-                System.out.println("Connected to database successfully!");
+    // Private constructor to prevent instantiation
+    private DatabaseConnection() {
+        establishConnection();
+    }
+
+    // Thread-safe singleton instance getter using double-checked locking
+    public static DatabaseConnection getInstance() {
+        if (instance == null) {
+            synchronized (DatabaseConnection.class) {
+                if (instance == null) {
+                    instance = new DatabaseConnection();
+                }
             }
+        }
+        return instance;
+    }
+
+    // Private method to establish connection
+    private void establishConnection() {
+        try {
+            Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
+            conn = DriverManager.getConnection(DB_URL, USER, PASS);
+            System.out.println("Connected to database successfully!");
         } catch (ClassNotFoundException e) {
             JOptionPane.showMessageDialog(null, "SQL Server JDBC Driver not found. Please add the driver to your project.",
                     "Database Error", JOptionPane.ERROR_MESSAGE);
@@ -33,10 +51,33 @@ public class DatabaseConnection {
                     "Database Error", JOptionPane.ERROR_MESSAGE);
             logger.log(Level.SEVERE, "Database connection error", e);
         }
+    }
+
+    // Static method to maintain backward compatibility
+    public static Connection getConnection() {
+        return getInstance().getConnectionInstance();
+    }
+
+    // Instance method to get connection
+    public Connection getConnectionInstance() {
+        try {
+            if (conn == null || conn.isClosed()) {
+                establishConnection();
+            }
+        } catch (SQLException e) {
+            logger.log(Level.SEVERE, "Error checking connection status", e);
+            establishConnection();
+        }
         return conn;
     }
 
+    // Static method to maintain backward compatibility
     public static void closeConnection() {
+        getInstance().closeConnectionInstance();
+    }
+
+    // Instance method to close connection
+    public void closeConnectionInstance() {
         try {
             if (conn != null && !conn.isClosed()) {
                 conn.close();
@@ -135,5 +176,11 @@ public class DatabaseConnection {
         } catch (SQLException e) {
             logger.log(Level.SEVERE, "Error closing ResultSet", e);
         }
+    }
+
+    // Prevent cloning
+    @Override
+    protected Object clone() throws CloneNotSupportedException {
+        throw new CloneNotSupportedException("Cloning of this singleton class is not allowed");
     }
 }
