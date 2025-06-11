@@ -1,8 +1,9 @@
 package model;
 
+import observer.Observer;
 import java.util.Date;
 
-public class Student {
+public class Student implements Observer {
     private int studentId;
     private String firstName;
     private String lastName;
@@ -34,6 +35,18 @@ public class Student {
         this.courseId = courseId;
         this.courseName = courseName;
         this.enrollmentDate = enrollmentDate;
+    }
+
+    // Observer pattern implementation
+    @Override
+    public void update(String message, Object data) {
+        if (data instanceof Grade) {
+            Grade grade = (Grade) data;
+            if (grade.getStudentId() == this.studentId) {
+                System.out.println("Student " + getFullName() + " received notification: " + message);
+                // Here you could also update student's internal state or trigger UI updates
+            }
+        }
     }
 
     // Getters and setters
@@ -127,6 +140,11 @@ public class Student {
 
     public void setEnrollmentDate(Date enrollmentDate) {
         this.enrollmentDate = enrollmentDate;
+    }
+
+    // Add this method to the Student class
+    public boolean isNull() {
+        return false; // Regular students are not null objects
     }
 
     @Override

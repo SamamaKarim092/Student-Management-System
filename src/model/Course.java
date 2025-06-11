@@ -49,6 +49,11 @@ public class Course {
         return credits;
     }
 
+    // Add this method to the Course class
+    public boolean isNull() {
+        return false; // Regular courses are not null objects
+    }
+
     public void setCredits(int credits) {
         this.credits = credits;
     }
