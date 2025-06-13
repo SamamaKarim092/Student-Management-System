@@ -5,14 +5,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="8fa129d0-56a4-48d4-91cb-6e35c3882e5a" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/src/factory/CourseFactory.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/factory/GradeFactory.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/factory/ModelFactory.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/model/Course.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/model/Course.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/model/Grade.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/model/Grade.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/model/Student.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/model/Student.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/view/Dashboard.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/view/Dashboard.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/view/LoginForm.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/view/LoginForm.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
