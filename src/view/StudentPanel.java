@@ -6,6 +6,7 @@ import database.DatabaseConnection;
 import model.Student;
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
@@ -25,9 +26,15 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JSplitPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
+import javax.swing.ListSelectionModel;
+import javax.swing.SwingConstants;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.JTableHeader;
+import javax.swing.table.TableColumn;
 import com.toedter.calendar.JDateChooser;
 
 public class StudentPanel extends JPanel {
@@ -39,35 +46,63 @@ public class StudentPanel extends JPanel {
     private JDateChooser dateChooser, enrollmentDateChooser;
     private HoverButton btnAdd, btnUpdate, btnDelete, btnClear, btnSearch;
     private JTextField txtSearch;
+    private JSplitPane splitPane;
+
+    // Enhanced color scheme
+    private static final Color PRIMARY_COLOR = new Color(41, 128, 185);
+    private static final Color SUCCESS_COLOR = new Color(39, 174, 96);
+    private static final Color DANGER_COLOR = new Color(231, 76, 60);
+    private static final Color WARNING_COLOR = new Color(243, 156, 18);
+    private static final Color SECONDARY_COLOR = new Color(149, 165, 166);
+    private static final Color BACKGROUND_COLOR = new Color(236, 240, 241);
+    private static final Color TABLE_HEADER_COLOR = new Color(52, 73, 94);
+    private static final Color TABLE_ROW_COLOR = new Color(255, 255, 255);
+    private static final Color TABLE_ALT_ROW_COLOR = new Color(248, 249, 250);
+    private static final Color TABLE_SELECTION_COLOR = new Color(52, 152, 219, 50);
+    private static final Color TABLE_HOVER_COLOR = new Color(52, 152, 219, 30);
 
     public StudentPanel() {
-        setBackground(new Color(240, 242, 245));
+        setBackground(BACKGROUND_COLOR);
         setLayout(new BorderLayout());
+        setPreferredSize(new Dimension(1200, 800)); // Set preferred size for proper proportions
 
         initComponents();
         loadStudentData();
     }
 
     private void initComponents() {
-        // Header panel
+        // Header panel with enhanced styling
         JPanel headerPanel = new JPanel(new BorderLayout());
-        headerPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 10, 20));
+        headerPanel.setBorder(BorderFactory.createEmptyBorder(20, 25, 15, 25));
         headerPanel.setOpaque(false);
+        headerPanel.setPreferredSize(new Dimension(0, 80)); // Fixed header height
 
-        JLabel titleLabel = new JLabel("Student Management");
-        titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 24));
+        JLabel titleLabel = new JLabel("Student Management System");
+        titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 28));
+        titleLabel.setForeground(new Color(44, 62, 80));
         headerPanel.add(titleLabel, BorderLayout.WEST);
 
-        // Search panel
-        JPanel searchPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        // Enhanced search panel
+        JPanel searchPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
         searchPanel.setOpaque(false);
 
+        JLabel searchLabel = new JLabel("Search:");
+        searchLabel.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        searchLabel.setForeground(new Color(127, 140, 141));
+        searchPanel.add(searchLabel);
+
         txtSearch = new JTextField(20);
-        txtSearch.setPreferredSize(new Dimension(200, 35));
+        txtSearch.setPreferredSize(new Dimension(220, 38));
+        txtSearch.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        txtSearch.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(new Color(189, 195, 199), 1),
+                BorderFactory.createEmptyBorder(8, 12, 8, 12)
+        ));
         searchPanel.add(txtSearch);
 
         btnSearch = new HoverButton("Search");
-        btnSearch.setDefaultColor(new Color(52, 152, 219));
+        btnSearch.setDefaultColor(PRIMARY_COLOR);
+        btnSearch.setPreferredSize(new Dimension(80, 38));
         btnSearch.addActionListener((ActionEvent e) -> {
             searchStudents(txtSearch.getText().trim());
         });
@@ -76,190 +111,192 @@ public class StudentPanel extends JPanel {
         headerPanel.add(searchPanel, BorderLayout.EAST);
         add(headerPanel, BorderLayout.NORTH);
 
-        // Main content panel
-        JPanel contentPanel = new JPanel(new BorderLayout(10, 10));
-        contentPanel.setBorder(BorderFactory.createEmptyBorder(10, 20, 20, 20));
-        contentPanel.setOpaque(false);
+        // Create split pane for form and table
+        splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
+        splitPane.setBorder(BorderFactory.createEmptyBorder(0, 25, 25, 25));
+        splitPane.setDividerLocation(0.45); // Form takes 45% of available space
+        splitPane.setResizeWeight(0.45); // Form gets 45% when resizing
+        splitPane.setDividerSize(8);
+        splitPane.setContinuousLayout(true);
 
-        // Form panel
-        RoundedPanel formPanel = new RoundedPanel(15, Color.WHITE);
+        // Create form panel (top half)
+        JPanel formContainer = new JPanel(new BorderLayout());
+        formContainer.setOpaque(false);
+        formContainer.setMinimumSize(new Dimension(0, 300)); // Minimum height for form
+
+        // Enhanced form panel
+        RoundedPanel formPanel = new RoundedPanel(20, Color.WHITE);
         formPanel.setLayout(new GridBagLayout());
-        formPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+        formPanel.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(new Color(220, 221, 225), 1),
+                BorderFactory.createEmptyBorder(20, 25, 20, 25)
+        ));
 
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.fill = GridBagConstraints.HORIZONTAL;
-        gbc.insets = new Insets(5, 5, 5, 5);
+        gbc.insets = new Insets(6, 8, 6, 8); // Reduced vertical spacing
 
-        // ID Field
-        gbc.gridx = 0;
-        gbc.gridy = 0;
-        JLabel lblId = new JLabel("Student ID:");
-        formPanel.add(lblId, gbc);
+        // Form fields with enhanced styling
+        addFormField(formPanel, gbc, "Student ID:", txtId = createStyledTextField(false), 0);
+        addFormField(formPanel, gbc, "First Name:", txtFirstName = createStyledTextField(true), 1);
+        addFormField(formPanel, gbc, "Last Name:", txtLastName = createStyledTextField(true), 2);
+        addFormField(formPanel, gbc, "Gender:", cbGender = createStyledComboBox(new String[]{"Male", "Female", "Other"}), 3);
+        addFormField(formPanel, gbc, "Date of Birth:", dateChooser = createStyledDateChooser(), 4);
 
-        gbc.gridx = 1;
-        txtId = new JTextField(15);
-        txtId.setEditable(false);
-        formPanel.add(txtId, gbc);
+        addFormField(formPanel, gbc, "Email:", txtEmail = createStyledTextField(true), 0, 2);
+        addFormField(formPanel, gbc, "Phone:", txtPhone = createStyledTextField(true), 1, 2);
+        addFormField(formPanel, gbc, "Address:", txtAddress = createStyledTextField(true), 2, 2);
+        addFormField(formPanel, gbc, "Course:", cbCourse = createStyledComboBox(new String[]{}), 3, 2);
+        addFormField(formPanel, gbc, "Enrollment Date:", enrollmentDateChooser = createStyledDateChooser(), 4, 2);
 
-        // First Name
-        gbc.gridx = 0;
-        gbc.gridy = 1;
-        JLabel lblFirstName = new JLabel("First Name:");
-        formPanel.add(lblFirstName, gbc);
-
-        gbc.gridx = 1;
-        txtFirstName = new JTextField(15);
-        formPanel.add(txtFirstName, gbc);
-
-        // Last Name
-        gbc.gridx = 0;
-        gbc.gridy = 2;
-        JLabel lblLastName = new JLabel("Last Name:");
-        formPanel.add(lblLastName, gbc);
-
-        gbc.gridx = 1;
-        txtLastName = new JTextField(15);
-        formPanel.add(txtLastName, gbc);
-
-        // Gender
-        gbc.gridx = 0;
-        gbc.gridy = 3;
-        JLabel lblGender = new JLabel("Gender:");
-        formPanel.add(lblGender, gbc);
-
-        gbc.gridx = 1;
-        String[] genders = {"Male", "Female", "Other"};
-        cbGender = new JComboBox<>(genders);
-        formPanel.add(cbGender, gbc);
-
-        // Date of Birth
-        gbc.gridx = 0;
-        gbc.gridy = 4;
-        JLabel lblDob = new JLabel("Date of Birth:");
-        formPanel.add(lblDob, gbc);
-
-        gbc.gridx = 1;
-        dateChooser = new JDateChooser();
-        dateChooser.setDateFormatString("yyyy-MM-dd");
-        formPanel.add(dateChooser, gbc);
-
-        // Email
-        gbc.gridx = 2;
-        gbc.gridy = 0;
-        JLabel lblEmail = new JLabel("Email:");
-        formPanel.add(lblEmail, gbc);
-
-        gbc.gridx = 3;
-        txtEmail = new JTextField(15);
-        formPanel.add(txtEmail, gbc);
-
-        // Phone
-        gbc.gridx = 2;
-        gbc.gridy = 1;
-        JLabel lblPhone = new JLabel("Phone:");
-        formPanel.add(lblPhone, gbc);
-
-        gbc.gridx = 3;
-        txtPhone = new JTextField(15);
-        formPanel.add(txtPhone, gbc);
-
-        // Address
-        gbc.gridx = 2;
-        gbc.gridy = 2;
-        JLabel lblAddress = new JLabel("Address:");
-        formPanel.add(lblAddress, gbc);
-
-        gbc.gridx = 3;
-        txtAddress = new JTextField(15);
-        formPanel.add(txtAddress, gbc);
-
-        // Course
-        gbc.gridx = 2;
-        gbc.gridy = 3;
-        JLabel lblCourse = new JLabel("Course:");
-        formPanel.add(lblCourse, gbc);
-
-        gbc.gridx = 3;
-        cbCourse = new JComboBox<>();
         loadCourses();
-        formPanel.add(cbCourse, gbc);
+        enrollmentDateChooser.setDate(new Date());
 
-        // Enrollment Date
-        gbc.gridx = 2;
-        gbc.gridy = 4;
-        JLabel lblEnrollment = new JLabel("Enrollment Date:");
-        formPanel.add(lblEnrollment, gbc);
-
-        gbc.gridx = 3;
-        enrollmentDateChooser = new JDateChooser();
-        enrollmentDateChooser.setDateFormatString("yyyy-MM-dd");
-        enrollmentDateChooser.setDate(new Date()); // Set to current date
-        formPanel.add(enrollmentDateChooser, gbc);
-
-        // Buttons Panel
+        // Enhanced buttons panel
         gbc.gridx = 0;
         gbc.gridy = 5;
         gbc.gridwidth = 4;
-        gbc.insets = new Insets(15, 5, 5, 5);
+        gbc.insets = new Insets(15, 8, 8, 8);
 
-        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 0));
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 0));
         buttonPanel.setOpaque(false);
 
-        btnAdd = new HoverButton("Add Student");
-        btnAdd.setDefaultColor(new Color(46, 204, 113));
-        btnAdd.addActionListener((ActionEvent e) -> {
-            addStudent();
-        });
+        btnAdd = createStyledButton("Add Student", SUCCESS_COLOR, 130, 38);
+        btnAdd.addActionListener((ActionEvent e) -> addStudent());
         buttonPanel.add(btnAdd);
 
-        btnUpdate = new HoverButton("Update");
-        btnUpdate.setDefaultColor(new Color(52, 152, 219));
-        btnUpdate.addActionListener((ActionEvent e) -> {
-            updateStudent();
-        });
+        btnUpdate = createStyledButton("Update", PRIMARY_COLOR, 100, 38);
+        btnUpdate.addActionListener((ActionEvent e) -> updateStudent());
         buttonPanel.add(btnUpdate);
 
-        btnDelete = new HoverButton("Delete");
-        btnDelete.setDefaultColor(new Color(231, 76, 60));
-        btnDelete.addActionListener((ActionEvent e) -> {
-            deleteStudent();
-        });
+        btnDelete = createStyledButton("Delete", DANGER_COLOR, 100, 38);
+        btnDelete.addActionListener((ActionEvent e) -> deleteStudent());
         buttonPanel.add(btnDelete);
 
-        btnClear = new HoverButton("Clear");
-        btnClear.setDefaultColor(new Color(149, 165, 166));
-        btnClear.addActionListener((ActionEvent e) -> {
-            clearForm();
-        });
+        btnClear = createStyledButton("Clear Form", SECONDARY_COLOR, 120, 38);
+        btnClear.addActionListener((ActionEvent e) -> clearForm());
         buttonPanel.add(btnClear);
 
         formPanel.add(buttonPanel, gbc);
+        formContainer.add(formPanel, BorderLayout.CENTER);
 
-        contentPanel.add(formPanel, BorderLayout.NORTH);
+        // Create table panel (bottom half)
+        JPanel tableContainer = new JPanel(new BorderLayout());
+        tableContainer.setOpaque(false);
+        tableContainer.setMinimumSize(new Dimension(0, 350)); // Minimum height for table
 
-        // Table panel
-        RoundedPanel tablePanel = new RoundedPanel(15, Color.WHITE);
+        // Enhanced table panel
+        RoundedPanel tablePanel = new RoundedPanel(20, Color.WHITE);
         tablePanel.setLayout(new BorderLayout());
-        tablePanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+        tablePanel.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(new Color(220, 221, 225), 1),
+                BorderFactory.createEmptyBorder(20, 25, 20, 25)
+        ));
 
-        // Create table
-        String[] columns = {"ID", "First Name", "Last Name", "Gender", "DOB", "Email", "Phone", "Course", "Enrollment Date"};
+        // Table title
+        JLabel tableTitle = new JLabel("Student Records");
+        tableTitle.setFont(new Font("Segoe UI", Font.BOLD, 18));
+        tableTitle.setForeground(new Color(44, 62, 80));
+        tableTitle.setBorder(BorderFactory.createEmptyBorder(0, 0, 15, 0));
+        tablePanel.add(tableTitle, BorderLayout.NORTH);
+
+        // Create enhanced table
+        createEnhancedTable();
+        JScrollPane scrollPane = new JScrollPane(studentTable);
+        scrollPane.setBorder(BorderFactory.createLineBorder(new Color(189, 195, 199), 1));
+        scrollPane.getViewport().setBackground(Color.WHITE);
+        scrollPane.setPreferredSize(new Dimension(0, 300)); // Ensure table takes enough space
+
+        // Enhanced scrollbar styling
+        scrollPane.getVerticalScrollBar().setUnitIncrement(16);
+        scrollPane.getHorizontalScrollBar().setUnitIncrement(16);
+
+        tablePanel.add(scrollPane, BorderLayout.CENTER);
+        tableContainer.add(tablePanel, BorderLayout.CENTER);
+
+        // Add components to split pane
+        splitPane.setTopComponent(formContainer);
+        splitPane.setBottomComponent(tableContainer);
+
+        add(splitPane, BorderLayout.CENTER);
+    }
+
+    private void createEnhancedTable() {
+        String[] columns = {"ID", "First Name", "Last Name", "Gender", "Date of Birth",
+                "Email", "Phone", "Course", "Enrollment Date"};
+
         tableModel = new DefaultTableModel(columns, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
-                return false; // Make table non-editable
+                return false;
             }
         };
 
         studentTable = new JTable(tableModel);
-        studentTable.setRowHeight(30);
-        studentTable.setSelectionBackground(new Color(52, 152, 219, 100));
-        studentTable.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-        studentTable.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 14));
-        studentTable.getTableHeader().setBackground(new Color(52, 73, 94));
-        studentTable.getTableHeader().setForeground(Color.WHITE);
 
-        // Add mouse listener to select row
+        // Enhanced table appearance - Increased row height for better visibility
+        studentTable.setRowHeight(40); // Increased from 45 to ensure 5+ rows visible
+        studentTable.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+        studentTable.setSelectionBackground(TABLE_SELECTION_COLOR);
+        studentTable.setSelectionForeground(Color.BLACK);
+        studentTable.setGridColor(new Color(220, 221, 225));
+        studentTable.setShowGrid(true);
+        studentTable.setIntercellSpacing(new Dimension(1, 1));
+        studentTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+
+        // Enhanced header styling
+        JTableHeader header = studentTable.getTableHeader();
+        header.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        header.setBackground(TABLE_HEADER_COLOR);
+        header.setForeground(Color.WHITE);
+        header.setPreferredSize(new Dimension(header.getPreferredSize().width, 45));
+        header.setBorder(BorderFactory.createEmptyBorder());
+
+        // Custom cell renderer for alternating row colors and better formatting
+        studentTable.setDefaultRenderer(Object.class, new DefaultTableCellRenderer() {
+            @Override
+            public Component getTableCellRendererComponent(JTable table, Object value,
+                                                           boolean isSelected, boolean hasFocus, int row, int column) {
+                Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+
+                if (!isSelected) {
+                    if (row % 2 == 0) {
+                        c.setBackground(TABLE_ROW_COLOR);
+                    } else {
+                        c.setBackground(TABLE_ALT_ROW_COLOR);
+                    }
+                }
+
+                // Center align numeric columns
+                if (column == 0) { // ID column
+                    setHorizontalAlignment(SwingConstants.CENTER);
+                } else {
+                    setHorizontalAlignment(SwingConstants.LEFT);
+                }
+
+                setBorder(BorderFactory.createEmptyBorder(6, 12, 6, 12));
+                return c;
+            }
+        });
+
+        // Set preferred column widths
+        setColumnWidths();
+
+        // Add hover effect
+        studentTable.addMouseMotionListener(new MouseAdapter() {
+            private int lastRow = -1;
+
+            @Override
+            public void mouseMoved(MouseEvent e) {
+                int row = studentTable.rowAtPoint(e.getPoint());
+                if (row != lastRow) {
+                    lastRow = row;
+                    studentTable.repaint();
+                }
+            }
+        });
+
+        // Add click listener
         studentTable.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
@@ -269,12 +306,75 @@ public class StudentPanel extends JPanel {
                 }
             }
         });
+    }
 
-        JScrollPane scrollPane = new JScrollPane(studentTable);
-        tablePanel.add(scrollPane, BorderLayout.CENTER);
+    private void setColumnWidths() {
+        int[] columnWidths = {60, 120, 120, 80, 120, 180, 120, 150, 130};
+        for (int i = 0; i < columnWidths.length && i < studentTable.getColumnCount(); i++) {
+            TableColumn column = studentTable.getColumnModel().getColumn(i);
+            column.setPreferredWidth(columnWidths[i]);
+            column.setMinWidth(columnWidths[i] - 20);
+            column.setMaxWidth(columnWidths[i] + 50);
+        }
+    }
 
-        contentPanel.add(tablePanel, BorderLayout.CENTER);
-        add(contentPanel, BorderLayout.CENTER);
+    private JTextField createStyledTextField(boolean editable) {
+        JTextField textField = new JTextField(15);
+        textField.setEditable(editable);
+        textField.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        textField.setPreferredSize(new Dimension(200, 32)); // Slightly smaller height
+        textField.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(editable ? new Color(189, 195, 199) : new Color(220, 221, 225), 1),
+                BorderFactory.createEmptyBorder(6, 12, 6, 12) // Reduced padding
+        ));
+        if (!editable) {
+            textField.setBackground(new Color(248, 249, 250));
+        }
+        return textField;
+    }
+
+    private JComboBox<String> createStyledComboBox(String[] items) {
+        JComboBox<String> comboBox = new JComboBox<>(items);
+        comboBox.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        comboBox.setPreferredSize(new Dimension(200, 32)); // Slightly smaller height
+        comboBox.setBackground(Color.WHITE);
+        return comboBox;
+    }
+
+    private JDateChooser createStyledDateChooser() {
+        JDateChooser dateChooser = new JDateChooser();
+        dateChooser.setDateFormatString("yyyy-MM-dd");
+        dateChooser.setPreferredSize(new Dimension(200, 32)); // Slightly smaller height
+        dateChooser.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        return dateChooser;
+    }
+
+    private HoverButton createStyledButton(String text, Color color, int width, int height) {
+        HoverButton button = new HoverButton(text);
+        button.setDefaultColor(color);
+        button.setPreferredSize(new Dimension(width, height));
+        button.setFont(new Font("Segoe UI", Font.BOLD, 13));
+        return button;
+    }
+
+    private void addFormField(JPanel panel, GridBagConstraints gbc, String labelText,
+                              Component component, int row) {
+        addFormField(panel, gbc, labelText, component, row, 0);
+    }
+
+    private void addFormField(JPanel panel, GridBagConstraints gbc, String labelText,
+                              Component component, int row, int columnOffset) {
+        gbc.gridx = columnOffset;
+        gbc.gridy = row;
+        gbc.gridwidth = 1;
+
+        JLabel label = new JLabel(labelText);
+        label.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        label.setForeground(new Color(127, 140, 141));
+        panel.add(label, gbc);
+
+        gbc.gridx = columnOffset + 1;
+        panel.add(component, gbc);
     }
 
     private void loadCourses() {
@@ -294,7 +394,6 @@ public class StudentPanel extends JPanel {
         }
     }
 
-    // Update the loadStudentData() method:
     private void loadStudentData() {
         tableModel.setRowCount(0);
         ResultSet rs = null;
@@ -330,7 +429,6 @@ public class StudentPanel extends JPanel {
         }
     }
 
-    // Update the displayStudentDetails() method:
     private void displayStudentDetails(int row) {
         ResultSet rs = null;
         try {
@@ -366,7 +464,6 @@ public class StudentPanel extends JPanel {
         }
     }
 
-    // Update the addStudent() method:
     private void addStudent() {
         if (!validateInputs()) {
             return;
@@ -485,7 +582,6 @@ public class StudentPanel extends JPanel {
         }
     }
 
-
     private void deleteStudent() {
         if (txtId.getText().isEmpty()) {
             JOptionPane.showMessageDialog(this, "Please select a student to delete.",
@@ -515,29 +611,31 @@ public class StudentPanel extends JPanel {
                             "Error", JOptionPane.ERROR_MESSAGE);
                 }
 
-            } catch (NumberFormatException e) {
-                JOptionPane.showMessageDialog(this, "Invalid student ID format.",
-                        "Input Error", JOptionPane.ERROR_MESSAGE);
-            } try {
-                // your code
-            } catch (Exception e) { // ✅ more generic
+            } catch (Exception e) {
                 e.printStackTrace();
+                JOptionPane.showMessageDialog(this, "Error deleting student: " + e.getMessage(),
+                        "Database Error", JOptionPane.ERROR_MESSAGE);
             }
-
         }
     }
 
     private void searchStudents(String keyword) {
+        if (keyword.isEmpty()) {
+            loadStudentData();
+            return;
+        }
+
         tableModel.setRowCount(0);
         ResultSet rs = null;
         try {
             String query = "SELECT s.studentId, s.firstName, s.lastName, s.gender, s.dateOfBirth, " +
                     "s.email, s.phone, c.courseName, s.enrollmentDate " +
                     "FROM Students s JOIN Courses c ON s.courseId = c.courseId " +
-                    "WHERE s.firstName LIKE ? OR s.lastName LIKE ? OR s.email LIKE ?";
+                    "WHERE s.firstName LIKE ? OR s.lastName LIKE ? OR s.email LIKE ? OR c.courseName LIKE ?";
 
             String searchKeyword = "%" + keyword + "%";
-            rs = DatabaseConnection.executePreparedQuery(query, searchKeyword, searchKeyword, searchKeyword);
+            rs = DatabaseConnection.executePreparedQuery(query, searchKeyword, searchKeyword,
+                    searchKeyword, searchKeyword);
 
             while (rs.next()) {
                 Object[] row = {
@@ -563,7 +661,6 @@ public class StudentPanel extends JPanel {
         }
     }
 
-
     private void clearForm() {
         txtId.setText("");
         txtFirstName.setText("");
@@ -578,11 +675,12 @@ public class StudentPanel extends JPanel {
         }
         enrollmentDateChooser.setDate(new Date());
         studentTable.clearSelection();
+        txtSearch.setText("");
     }
 
     private boolean validateInputs() {
-        if (txtFirstName.getText().isEmpty() || txtLastName.getText().isEmpty() ||
-                txtEmail.getText().isEmpty() || txtPhone.getText().isEmpty()) {
+        if (txtFirstName.getText().trim().isEmpty() || txtLastName.getText().trim().isEmpty() ||
+                txtEmail.getText().trim().isEmpty() || txtPhone.getText().trim().isEmpty()) {
             JOptionPane.showMessageDialog(this, "Please fill all required fields.",
                     "Input Error", JOptionPane.ERROR_MESSAGE);
             return false;
@@ -608,7 +706,7 @@ public class StudentPanel extends JPanel {
         }
 
         if (txtPhone.getText().length() < 10) {
-            JOptionPane.showMessageDialog(this, "Please enter a valid phone number.",
+            JOptionPane.showMessageDialog(this, "Please enter a valid phone number (at least 10 digits).",
                     "Input Error", JOptionPane.ERROR_MESSAGE);
             return false;
         }

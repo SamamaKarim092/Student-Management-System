@@ -1,27 +1,37 @@
 package components;
 
-import java.awt.Color;
-import java.awt.Cursor;
-import java.awt.Font;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.RenderingHints;
+import javax.swing.*;
+import javax.swing.border.EmptyBorder;
+import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import javax.swing.JButton;
-import javax.swing.border.EmptyBorder;
 
 public class HoverButton extends JButton {
-    private Color defaultColor = new Color(41, 128, 185);
-    private Color hoverColor = new Color(52, 152, 219);
+    private Color defaultColor = new Color(72, 84, 96);
+    private Color hoverColor = new Color(47, 54, 64);
     private Color pressedColor = new Color(26, 82, 118);
+    private Color selectedColor = new Color(0, 150, 255);
     private Color textColor = Color.WHITE;
+
     private boolean isHovered = false;
     private boolean isPressed = false;
-    private int cornerRadius = 10;
+    private boolean isSelected = false;
 
+    private int cornerRadius = 15;
+    private ImageIcon icon;
+
+    // Constructors
     public HoverButton(String text) {
+        this(text, null);
+    }
+
+    public HoverButton(String text, ImageIcon icon) {
         super(text);
+        this.icon = icon;
+        init();
+    }
+
+    private void init() {
         setContentAreaFilled(false);
         setBorderPainted(false);
         setFocusPainted(false);
@@ -64,34 +74,56 @@ public class HoverButton extends JButton {
         Graphics2D g2 = (Graphics2D) g.create();
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
-        // Set color based on button state
+        // Background color based on state
         if (isPressed) {
             g2.setColor(pressedColor);
+        } else if (isSelected) {
+            g2.setColor(selectedColor);
         } else if (isHovered) {
             g2.setColor(hoverColor);
         } else {
-            g2.setColor(getBackground());
+            g2.setColor(defaultColor);
         }
 
         g2.fillRoundRect(0, 0, getWidth(), getHeight(), cornerRadius, cornerRadius);
 
-        // Draw text
+        // Draw icon and text
         g2.setColor(getForeground());
         g2.setFont(getFont());
+        FontMetrics fm = g2.getFontMetrics();
 
-        // Center text
-        int textWidth = g2.getFontMetrics().stringWidth(getText());
-        int textHeight = g2.getFontMetrics().getHeight();
-        g2.drawString(getText(), (getWidth() - textWidth) / 2,
-                (getHeight() - textHeight) / 2 + g2.getFontMetrics().getAscent());
+        int totalWidth = 0;
+        int gap = 10;
+
+        if (icon != null) {
+            totalWidth += icon.getIconWidth();
+        }
+        if (getText() != null && !getText().isEmpty()) {
+            totalWidth += fm.stringWidth(getText());
+            if (icon != null) totalWidth += gap;
+        }
+
+        int x = (getWidth() - totalWidth) / 2;
+        int yText = (getHeight() - fm.getHeight()) / 2 + fm.getAscent();
+
+        // Draw icon
+        if (icon != null) {
+            int yIcon = (getHeight() - icon.getIconHeight()) / 2;
+            g2.drawImage(icon.getImage(), x, yIcon, this);
+            x += icon.getIconWidth() + gap;
+        }
+
+        // Draw text
+        if (getText() != null) {
+            g2.drawString(getText(), x, yText);
+        }
 
         g2.dispose();
     }
 
-    // Getter and setter methods for customization
+    // Customization Methods
     public void setDefaultColor(Color color) {
         this.defaultColor = color;
-        setBackground(color);
         repaint();
     }
 
@@ -105,6 +137,11 @@ public class HoverButton extends JButton {
         repaint();
     }
 
+    public void setSelectedColor(Color color) {
+        this.selectedColor = color;
+        repaint();
+    }
+
     public void setButtonTextColor(Color color) {
         this.textColor = color;
         setForeground(color);
@@ -113,6 +150,16 @@ public class HoverButton extends JButton {
 
     public void setCornerRadius(int radius) {
         this.cornerRadius = radius;
+        repaint();
+    }
+
+    public void setSelected(boolean selected) {
+        this.isSelected = selected;
+        repaint();
+    }
+
+    public void setButtonIcon(ImageIcon icon) {
+        this.icon = icon;
         repaint();
     }
 }
