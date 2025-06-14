@@ -3,9 +3,9 @@ package view;
 import components.HoverButton;
 import components.RoundedPanel;
 import database.DatabaseConnection;
-import model.Course;
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
@@ -26,7 +26,10 @@ import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.JTableHeader;
+import javax.swing.table.TableColumn;
 
 public class CoursePanel extends JPanel {
 
@@ -53,14 +56,25 @@ public class CoursePanel extends JPanel {
 
         JLabel titleLabel = new JLabel("Course Management");
         titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 24));
+        titleLabel.setForeground(new Color(52, 73, 94));
         headerPanel.add(titleLabel, BorderLayout.WEST);
 
         // Search panel
         JPanel searchPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         searchPanel.setOpaque(false);
 
+        JLabel searchLabel = new JLabel("Search:");
+        searchLabel.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        searchLabel.setForeground(new Color(52, 73, 94));
+        searchPanel.add(searchLabel);
+
         txtSearch = new JTextField(20);
         txtSearch.setPreferredSize(new Dimension(200, 35));
+        txtSearch.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        txtSearch.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(new Color(189, 195, 199), 1),
+                BorderFactory.createEmptyBorder(5, 10, 5, 10)
+        ));
         searchPanel.add(txtSearch);
 
         btnSearch = new HoverButton("Search");
@@ -85,53 +99,87 @@ public class CoursePanel extends JPanel {
 
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.fill = GridBagConstraints.HORIZONTAL;
-        gbc.insets = new Insets(5, 5, 5, 5);
+        gbc.insets = new Insets(8, 8, 8, 8);
+
+        Font labelFont = new Font("Segoe UI", Font.BOLD, 14);
+        Font fieldFont = new Font("Segoe UI", Font.PLAIN, 14);
 
         // ID Field
         gbc.gridx = 0;
         gbc.gridy = 0;
         JLabel lblId = new JLabel("Course ID:");
+        lblId.setFont(labelFont);
+        lblId.setForeground(new Color(52, 73, 94));
         formPanel.add(lblId, gbc);
 
         gbc.gridx = 1;
         txtId = new JTextField(15);
         txtId.setEditable(false);
+        txtId.setFont(fieldFont);
+        txtId.setBackground(new Color(248, 249, 250));
+        txtId.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(new Color(189, 195, 199), 1),
+                BorderFactory.createEmptyBorder(5, 10, 5, 10)
+        ));
         formPanel.add(txtId, gbc);
 
         // Course Name
         gbc.gridx = 0;
         gbc.gridy = 1;
         JLabel lblCourseName = new JLabel("Course Name:");
+        lblCourseName.setFont(labelFont);
+        lblCourseName.setForeground(new Color(52, 73, 94));
         formPanel.add(lblCourseName, gbc);
 
         gbc.gridx = 1;
         txtCourseName = new JTextField(15);
+        txtCourseName.setFont(fieldFont);
+        txtCourseName.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(new Color(189, 195, 199), 1),
+                BorderFactory.createEmptyBorder(5, 10, 5, 10)
+        ));
         formPanel.add(txtCourseName, gbc);
 
         // Department
         gbc.gridx = 0;
         gbc.gridy = 2;
         JLabel lblDepartment = new JLabel("Department:");
+        lblDepartment.setFont(labelFont);
+        lblDepartment.setForeground(new Color(52, 73, 94));
         formPanel.add(lblDepartment, gbc);
 
         gbc.gridx = 1;
         txtDepartment = new JTextField(15);
+        txtDepartment.setFont(fieldFont);
+        txtDepartment.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(new Color(189, 195, 199), 1),
+                BorderFactory.createEmptyBorder(5, 10, 5, 10)
+        ));
         formPanel.add(txtDepartment, gbc);
 
         // Credits
         gbc.gridx = 0;
         gbc.gridy = 3;
         JLabel lblCredits = new JLabel("Credits:");
+        lblCredits.setFont(labelFont);
+        lblCredits.setForeground(new Color(52, 73, 94));
         formPanel.add(lblCredits, gbc);
 
         gbc.gridx = 1;
         txtCredits = new JTextField(15);
+        txtCredits.setFont(fieldFont);
+        txtCredits.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(new Color(189, 195, 199), 1),
+                BorderFactory.createEmptyBorder(5, 10, 5, 10)
+        ));
         formPanel.add(txtCredits, gbc);
 
         // Description
         gbc.gridx = 2;
         gbc.gridy = 0;
         JLabel lblDescription = new JLabel("Description:");
+        lblDescription.setFont(labelFont);
+        lblDescription.setForeground(new Color(52, 73, 94));
         formPanel.add(lblDescription, gbc);
 
         gbc.gridx = 3;
@@ -140,7 +188,10 @@ public class CoursePanel extends JPanel {
         txtDescription = new JTextArea(5, 20);
         txtDescription.setLineWrap(true);
         txtDescription.setWrapStyleWord(true);
+        txtDescription.setFont(fieldFont);
+        txtDescription.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
         JScrollPane descScrollPane = new JScrollPane(txtDescription);
+        descScrollPane.setBorder(BorderFactory.createLineBorder(new Color(189, 195, 199), 1));
         formPanel.add(descScrollPane, gbc);
         gbc.gridheight = 1;
 
@@ -148,13 +199,14 @@ public class CoursePanel extends JPanel {
         gbc.gridx = 0;
         gbc.gridy = 4;
         gbc.gridwidth = 4;
-        gbc.insets = new Insets(15, 5, 5, 5);
+        gbc.insets = new Insets(20, 8, 8, 8);
 
-        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 0));
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 0));
         buttonPanel.setOpaque(false);
 
         btnAdd = new HoverButton("Add Course");
         btnAdd.setDefaultColor(new Color(46, 204, 113));
+        btnAdd.setPreferredSize(new Dimension(120, 40));
         btnAdd.addActionListener((ActionEvent e) -> {
             addCourse();
         });
@@ -162,6 +214,7 @@ public class CoursePanel extends JPanel {
 
         btnUpdate = new HoverButton("Update");
         btnUpdate.setDefaultColor(new Color(52, 152, 219));
+        btnUpdate.setPreferredSize(new Dimension(120, 40));
         btnUpdate.addActionListener((ActionEvent e) -> {
             updateCourse();
         });
@@ -169,6 +222,7 @@ public class CoursePanel extends JPanel {
 
         btnDelete = new HoverButton("Delete");
         btnDelete.setDefaultColor(new Color(231, 76, 60));
+        btnDelete.setPreferredSize(new Dimension(120, 40));
         btnDelete.addActionListener((ActionEvent e) -> {
             deleteCourse();
         });
@@ -176,6 +230,7 @@ public class CoursePanel extends JPanel {
 
         btnClear = new HoverButton("Clear");
         btnClear.setDefaultColor(new Color(149, 165, 166));
+        btnClear.setPreferredSize(new Dimension(120, 40));
         btnClear.addActionListener((ActionEvent e) -> {
             clearForm();
         });
@@ -190,7 +245,7 @@ public class CoursePanel extends JPanel {
         tablePanel.setLayout(new BorderLayout());
         tablePanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
-        // Create table
+        // Create table with enhanced styling
         String[] columns = {"ID", "Course Name", "Department", "Credits", "Description"};
         tableModel = new DefaultTableModel(columns, 0) {
             @Override
@@ -200,12 +255,75 @@ public class CoursePanel extends JPanel {
         };
 
         courseTable = new JTable(tableModel);
-        courseTable.setRowHeight(30);
-        courseTable.setSelectionBackground(new Color(52, 152, 219, 100));
-        courseTable.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-        courseTable.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 14));
-        courseTable.getTableHeader().setBackground(new Color(52, 73, 94));
-        courseTable.getTableHeader().setForeground(Color.WHITE);
+
+        // Enhanced table styling
+        courseTable.setRowHeight(40);
+        courseTable.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+        courseTable.setSelectionBackground(new Color(52, 152, 219, 40));
+        courseTable.setSelectionForeground(new Color(44, 62, 80));
+        courseTable.setGridColor(new Color(220, 221, 225));
+        courseTable.setShowGrid(true);
+        courseTable.setIntercellSpacing(new Dimension(1, 1));
+
+        // Style the header
+        JTableHeader header = courseTable.getTableHeader();
+        header.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        header.setBackground(new Color(52, 73, 94));
+        header.setForeground(Color.BLACK);
+        header.setPreferredSize(new Dimension(header.getPreferredSize().width, 45));
+        header.setBorder(BorderFactory.createEmptyBorder());
+
+        // Custom cell renderer for alternating row colors
+        DefaultTableCellRenderer cellRenderer = new DefaultTableCellRenderer() {
+            @Override
+            public Component getTableCellRendererComponent(JTable table, Object value,
+                                                           boolean isSelected, boolean hasFocus, int row, int column) {
+                Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+
+                if (!isSelected) {
+                    if (row % 2 == 0) {
+                        c.setBackground(Color.WHITE);
+                    } else {
+                        c.setBackground(new Color(248, 249, 250));
+                    }
+                }
+
+                // Center align numeric columns
+                if (column == 0 || column == 3) { // ID and Credits columns
+                    ((DefaultTableCellRenderer) c).setHorizontalAlignment(SwingConstants.CENTER);
+                } else {
+                    ((DefaultTableCellRenderer) c).setHorizontalAlignment(SwingConstants.LEFT);
+                }
+
+                setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
+                return c;
+            }
+        };
+
+        // Apply custom renderer to all columns
+        for (int i = 0; i < courseTable.getColumnCount(); i++) {
+            courseTable.getColumnModel().getColumn(i).setCellRenderer(cellRenderer);
+        }
+
+        // Set column widths
+        TableColumn idColumn = courseTable.getColumnModel().getColumn(0);
+        idColumn.setPreferredWidth(60);
+        idColumn.setMaxWidth(80);
+        idColumn.setMinWidth(50);
+
+        TableColumn nameColumn = courseTable.getColumnModel().getColumn(1);
+        nameColumn.setPreferredWidth(200);
+
+        TableColumn deptColumn = courseTable.getColumnModel().getColumn(2);
+        deptColumn.setPreferredWidth(150);
+
+        TableColumn creditsColumn = courseTable.getColumnModel().getColumn(3);
+        creditsColumn.setPreferredWidth(80);
+        creditsColumn.setMaxWidth(100);
+        creditsColumn.setMinWidth(60);
+
+        TableColumn descColumn = courseTable.getColumnModel().getColumn(4);
+        descColumn.setPreferredWidth(300);
 
         // Add mouse listener to select row
         courseTable.addMouseListener(new MouseAdapter() {
@@ -219,13 +337,20 @@ public class CoursePanel extends JPanel {
         });
 
         JScrollPane scrollPane = new JScrollPane(courseTable);
+        scrollPane.setBorder(BorderFactory.createLineBorder(new Color(220, 221, 225), 1));
+        scrollPane.getViewport().setBackground(Color.WHITE);
         tablePanel.add(scrollPane, BorderLayout.CENTER);
+
+        // Add table info label
+        JLabel tableInfoLabel = new JLabel("Click on a row to select and edit course details");
+        tableInfoLabel.setFont(new Font("Segoe UI", Font.ITALIC, 12));
+        tableInfoLabel.setForeground(new Color(127, 140, 141));
+        tableInfoLabel.setBorder(BorderFactory.createEmptyBorder(10, 0, 0, 0));
+        tablePanel.add(tableInfoLabel, BorderLayout.SOUTH);
 
         contentPanel.add(tablePanel, BorderLayout.CENTER);
         add(contentPanel, BorderLayout.CENTER);
     }
-
-
 
     private void loadCourseData() {
         // Clear the table
@@ -334,7 +459,6 @@ public class CoursePanel extends JPanel {
         }
     }
 
-    // Update the deleteCourse() method:
     private void deleteCourse() {
         if (txtId.getText().isEmpty()) {
             JOptionPane.showMessageDialog(this, "Please select a course to delete.",
@@ -389,10 +513,6 @@ public class CoursePanel extends JPanel {
         }
     }
 
-
-
-
-    // Update the searchCourses() method:
     private void searchCourses(String searchTerm) {
         tableModel.setRowCount(0);
         ResultSet rs = null;
@@ -466,4 +586,3 @@ public class CoursePanel extends JPanel {
         return true;
     }
 }
-

@@ -88,7 +88,7 @@ public class StudentPanel extends JPanel {
 
         JLabel searchLabel = new JLabel("Search:");
         searchLabel.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-        searchLabel.setForeground(new Color(127, 140, 141));
+        searchLabel.setForeground(new Color(44, 53, 53));
         searchPanel.add(searchLabel);
 
         txtSearch = new JTextField(20);
@@ -248,7 +248,7 @@ public class StudentPanel extends JPanel {
         JTableHeader header = studentTable.getTableHeader();
         header.setFont(new Font("Segoe UI", Font.BOLD, 14));
         header.setBackground(TABLE_HEADER_COLOR);
-        header.setForeground(Color.WHITE);
+        header.setForeground(Color.BLACK);
         header.setPreferredSize(new Dimension(header.getPreferredSize().width, 45));
         header.setBorder(BorderFactory.createEmptyBorder());
 
@@ -369,12 +369,13 @@ public class StudentPanel extends JPanel {
         gbc.gridwidth = 1;
 
         JLabel label = new JLabel(labelText);
-        label.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-        label.setForeground(new Color(127, 140, 141));
+        label.setFont(new Font("Segoe UI", Font.BOLD, 14)); // Changed to BOLD
+        label.setForeground(new Color(51, 57, 57));
         panel.add(label, gbc);
 
         gbc.gridx = columnOffset + 1;
         panel.add(component, gbc);
+
     }
 
     private void loadCourses() {
