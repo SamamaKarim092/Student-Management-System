@@ -1,31 +1,45 @@
+// Updated RoundedPanel class using Bridge Pattern
 package components;
 
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.RenderingHints;
+import java.awt.*;
 import javax.swing.JPanel;
 
-public class RoundedPanel extends JPanel {
+public class RoundedPanel extends JPanel implements UIComponent {
+    private PanelStyle panelStyle;
     private int cornerRadius = 15;
     private Color shadowColor = new Color(0, 0, 0, 50);
     private int shadowSize = 5;
 
+    // Constructors
     public RoundedPanel() {
-        super();
-        setOpaque(false);
+        this(new RoundedPanelStyle());
     }
 
     public RoundedPanel(int radius) {
-        super();
-        this.cornerRadius = radius;
-        setOpaque(false);
+        this(radius, new RoundedPanelStyle());
     }
 
     public RoundedPanel(int radius, Color bgColor) {
+        this(radius, bgColor, new RoundedPanelStyle());
+    }
+
+    public RoundedPanel(PanelStyle style) {
+        super();
+        this.panelStyle = style;
+        setOpaque(false);
+    }
+
+    public RoundedPanel(int radius, PanelStyle style) {
         super();
         this.cornerRadius = radius;
+        this.panelStyle = style;
+        setOpaque(false);
+    }
+
+    public RoundedPanel(int radius, Color bgColor, PanelStyle style) {
+        super();
+        this.cornerRadius = radius;
+        this.panelStyle = style;
         setBackground(bgColor);
         setOpaque(false);
     }
@@ -33,25 +47,35 @@ public class RoundedPanel extends JPanel {
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
-        Dimension arcs = new Dimension(cornerRadius, cornerRadius);
-        int width = getWidth();
-        int height = getHeight();
-        Graphics2D graphics = (Graphics2D) g;
+        Graphics2D g2 = (Graphics2D) g.create();
+        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
-        // Enable antialiasing for smooth edges
-        graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-
-        // Draw shadow
-        graphics.setColor(shadowColor);
-        graphics.fillRoundRect(shadowSize, shadowSize, width - shadowSize * 2,
-                height - shadowSize * 2, arcs.width, arcs.height);
-
-        // Draw main panel
-        graphics.setColor(getBackground());
-        graphics.fillRoundRect(0, 0, width - shadowSize, height - shadowSize,
-                arcs.width, arcs.height);
+        render(g2, getWidth(), getHeight());
+        g2.dispose();
     }
 
+    @Override
+    public void render(Graphics2D g2, int width, int height) {
+        // Use the bridge to delegate rendering
+        panelStyle.drawPanel(g2, width, height, cornerRadius, getBackground(), shadowColor, shadowSize);
+    }
+
+    @Override
+    public void handleStateChange() {
+        repaint();
+    }
+
+    // Bridge pattern methods
+    public void setPanelStyle(PanelStyle style) {
+        this.panelStyle = style;
+        repaint();
+    }
+
+    public PanelStyle getPanelStyle() {
+        return panelStyle;
+    }
+
+    // Existing methods remain the same
     public void setCornerRadius(int radius) {
         this.cornerRadius = radius;
         repaint();

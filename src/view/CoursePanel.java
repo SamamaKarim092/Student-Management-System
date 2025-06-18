@@ -3,6 +3,7 @@ package view;
 import components.HoverButton;
 import components.RoundedPanel;
 import database.DatabaseConnection;
+import model.Course;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
@@ -269,7 +270,7 @@ public class CoursePanel extends JPanel {
         JTableHeader header = courseTable.getTableHeader();
         header.setFont(new Font("Segoe UI", Font.BOLD, 14));
         header.setBackground(new Color(52, 73, 94));
-        header.setForeground(Color.BLACK);
+        header.setForeground(Color.WHITE);
         header.setPreferredSize(new Dimension(header.getPreferredSize().width, 45));
         header.setBorder(BorderFactory.createEmptyBorder());
 
