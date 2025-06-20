@@ -3,7 +3,6 @@ package view;
 import components.HoverButton;
 import components.RoundedPanel;
 import database.DatabaseConnection;
-import model.Course;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
@@ -31,6 +30,7 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
 import javax.swing.table.TableColumn;
+import mediator.PanelMediator;
 
 public class CoursePanel extends JPanel {
 
@@ -40,6 +40,16 @@ public class CoursePanel extends JPanel {
     private JTextArea txtDescription;
     private HoverButton btnAdd, btnUpdate, btnDelete, btnClear, btnSearch;
     private JTextField txtSearch;
+    private PanelMediator mediator;
+
+    public CoursePanel(PanelMediator mediator) {
+        this();
+        this.mediator = mediator;
+    }
+
+    public void setMediator(PanelMediator mediator) {
+        this.mediator = mediator;
+    }
 
     public CoursePanel() {
         setBackground(new Color(240, 242, 245));
@@ -210,6 +220,7 @@ public class CoursePanel extends JPanel {
         btnAdd.setPreferredSize(new Dimension(120, 40));
         btnAdd.addActionListener((ActionEvent e) -> {
             addCourse();
+            if (mediator != null) mediator.courseAdded();
         });
         buttonPanel.add(btnAdd);
 
@@ -218,6 +229,7 @@ public class CoursePanel extends JPanel {
         btnUpdate.setPreferredSize(new Dimension(120, 40));
         btnUpdate.addActionListener((ActionEvent e) -> {
             updateCourse();
+            if (mediator != null) mediator.courseUpdated();
         });
         buttonPanel.add(btnUpdate);
 
@@ -226,6 +238,7 @@ public class CoursePanel extends JPanel {
         btnDelete.setPreferredSize(new Dimension(120, 40));
         btnDelete.addActionListener((ActionEvent e) -> {
             deleteCourse();
+            if (mediator != null) mediator.courseDeleted();
         });
         buttonPanel.add(btnDelete);
 
@@ -270,7 +283,7 @@ public class CoursePanel extends JPanel {
         JTableHeader header = courseTable.getTableHeader();
         header.setFont(new Font("Segoe UI", Font.BOLD, 14));
         header.setBackground(new Color(52, 73, 94));
-        header.setForeground(Color.WHITE);
+        header.setForeground(Color.BLACK);
         header.setPreferredSize(new Dimension(header.getPreferredSize().width, 45));
         header.setBorder(BorderFactory.createEmptyBorder());
 

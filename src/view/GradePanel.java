@@ -1,19 +1,19 @@
 package view;
 
-import model.Grade;
-import database.GradeHandler;
-import database.DatabaseConnection;
 import components.HoverButton;
 import components.RoundedPanel;
-
-import javax.swing.*;
-import javax.swing.table.DefaultTableModel;
-import javax.swing.table.DefaultTableCellRenderer;
-import javax.swing.table.JTableHeader;
+import database.DatabaseConnection;
+import database.GradeHandler;
 import java.awt.*;
 import java.sql.*;
 import java.util.List;
 import java.util.Vector;
+import javax.swing.*;
+import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.table.JTableHeader;
+import mediator.PanelMediator;
+import model.Grade;
 
 public class GradePanel extends JPanel {
     private JTable gradeTable;
@@ -29,6 +29,17 @@ public class GradePanel extends JPanel {
     private int selectedGradeId = -1;
     private Vector<Integer> studentIds = new Vector<>();
     private Vector<Integer> courseIds = new Vector<>();
+
+    private PanelMediator mediator;
+
+    public GradePanel(PanelMediator mediator) {
+        this();
+        this.mediator = mediator;
+    }
+
+    public void setMediator(PanelMediator mediator) {
+        this.mediator = mediator;
+    }
 
     public GradePanel() {
         setBackground(new Color(240, 242, 245));
@@ -190,19 +201,28 @@ public class GradePanel extends JPanel {
         addButton = new HoverButton("Add Grade");
         addButton.setDefaultColor(new Color(46, 204, 113));
         addButton.setPreferredSize(new Dimension(120, 40));
-        addButton.addActionListener(e -> addGrade());
+        addButton.addActionListener(e -> {
+            addGrade();
+            if (mediator != null) mediator.refreshGrades();
+        });
         buttonPanel.add(addButton);
 
         updateButton = new HoverButton("Update");
         updateButton.setDefaultColor(new Color(52, 152, 219));
         updateButton.setPreferredSize(new Dimension(120, 40));
-        updateButton.addActionListener(e -> updateGrade());
+        updateButton.addActionListener(e -> {
+            updateGrade();
+            if (mediator != null) mediator.refreshGrades();
+        });
         buttonPanel.add(updateButton);
 
         deleteButton = new HoverButton("Delete");
         deleteButton.setDefaultColor(new Color(231, 76, 60));
         deleteButton.setPreferredSize(new Dimension(120, 40));
-        deleteButton.addActionListener(e -> deleteGrade());
+        deleteButton.addActionListener(e -> {
+            deleteGrade();
+            if (mediator != null) mediator.refreshGrades();
+        });
         buttonPanel.add(deleteButton);
 
         clearButton = new HoverButton("Clear");
@@ -410,33 +430,9 @@ public class GradePanel extends JPanel {
     }
 
     public void refreshStudents() {
-        Vector<String> studentNames = new Vector<>();
-        studentIds = new Vector<>();
-        try (Connection conn = DatabaseConnection.getConnection();
-             Statement stmt = conn.createStatement();
-             ResultSet rs = stmt.executeQuery("SELECT studentId, firstName, lastName FROM students")) {
-
-            while (rs.next()) {
-                studentIds.add(rs.getInt("studentId"));
-                String fullName = rs.getString("firstName") + " " + rs.getString("lastName");
-                studentNames.add(fullName);
-            }
-
-            studentComboBox.removeAllItems();
-            if (studentNames.isEmpty()) {
-                studentComboBox.addItem("No students available");
-                studentComboBox.setEnabled(false);
-            } else {
-                for (String name : studentNames) {
-                    studentComboBox.addItem(name);
-                }
-                studentComboBox.setEnabled(true);
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-            JOptionPane.showMessageDialog(this, "Error refreshing students: " + e.getMessage(),
-                    "Database Error", JOptionPane.ERROR_MESSAGE);
-        }
+        loadDropdownData();
+        studentComboBox.revalidate();
+        studentComboBox.repaint();
     }
 
     private void loadGrades() {
@@ -488,6 +484,7 @@ public class GradePanel extends JPanel {
                         "Success", JOptionPane.INFORMATION_MESSAGE);
                 clearForm();
                 loadGrades();
+                if (mediator != null) mediator.refreshGrades();
             } else {
                 JOptionPane.showMessageDialog(this, "Failed to add grade",
                         "Error", JOptionPane.ERROR_MESSAGE);
@@ -537,6 +534,7 @@ public class GradePanel extends JPanel {
                         "Success", JOptionPane.INFORMATION_MESSAGE);
                 clearForm();
                 loadGrades();
+                if (mediator != null) mediator.refreshGrades();
             } else {
                 JOptionPane.showMessageDialog(this, "Failed to update grade",
                         "Error", JOptionPane.ERROR_MESSAGE);
@@ -567,6 +565,7 @@ public class GradePanel extends JPanel {
                         "Success", JOptionPane.INFORMATION_MESSAGE);
                 clearForm();
                 loadGrades();
+                if (mediator != null) mediator.refreshGrades();
             } else {
                 JOptionPane.showMessageDialog(this, "Failed to delete grade",
                         "Error", JOptionPane.ERROR_MESSAGE);
@@ -626,5 +625,61 @@ public class GradePanel extends JPanel {
             semesterField.setText(semester);
             yearField.setText(String.valueOf(year));
         }
+    }
+
+    // Filter grades by student (Implementation of mediator pattern )
+    public void filterGradesByStudent(int studentId, String studentName) {
+        tableModel.setRowCount(0);
+        List<Grade> allGrades = GradeHandler.getAllGrades();
+        for (Grade grade : allGrades) {
+            if (grade.getStudentId() == studentId) {
+                Vector<Object> row = new Vector<>();
+                row.add(grade.getId());
+                row.add(GradeHandler.getStudentName(grade.getStudentId()));
+                row.add(GradeHandler.getCourseName(grade.getCourseId()));
+                row.add(grade.getGrade());
+                row.add(grade.getSemester());
+                row.add(grade.getAcademicYear());
+                tableModel.addRow(row);
+            }
+        }
+    }
+
+    // Filter grades by course
+    public void filterGradesByCourse(int courseId, String courseName) {
+        tableModel.setRowCount(0);
+        List<Grade> allGrades = GradeHandler.getAllGrades();
+        for (Grade grade : allGrades) {
+            if (grade.getCourseId() == courseId) {
+                Vector<Object> row = new Vector<>();
+                row.add(grade.getId());
+                row.add(GradeHandler.getStudentName(grade.getStudentId()));
+                row.add(GradeHandler.getCourseName(grade.getCourseId()));
+                row.add(grade.getGrade());
+                row.add(grade.getSemester());
+                row.add(grade.getAcademicYear());
+                tableModel.addRow(row);
+            }
+        }
+    }
+
+    // Refresh the grades table
+    public void refreshGrades() {
+        loadGrades();
+    }
+
+    // Refresh the courses dropdown
+    public void refreshCourses() {
+        loadDropdownData();
+        courseComboBox.revalidate();
+        courseComboBox.repaint();
+    }
+
+    public void refreshDropdowns() {
+        loadDropdownData();
+        studentComboBox.revalidate();
+        studentComboBox.repaint();
+        courseComboBox.revalidate();
+        courseComboBox.repaint();
     }
 }

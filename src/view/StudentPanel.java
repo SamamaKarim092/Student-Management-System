@@ -36,6 +36,7 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
 import javax.swing.table.TableColumn;
 import com.toedter.calendar.JDateChooser;
+import mediator.PanelMediator;
 
 public class StudentPanel extends JPanel {
 
@@ -47,6 +48,7 @@ public class StudentPanel extends JPanel {
     private HoverButton btnAdd, btnUpdate, btnDelete, btnClear, btnSearch;
     private JTextField txtSearch;
     private JSplitPane splitPane;
+    private PanelMediator mediator;
 
     // Enhanced color scheme
     private static final Color PRIMARY_COLOR = new Color(41, 128, 185);
@@ -68,6 +70,15 @@ public class StudentPanel extends JPanel {
 
         initComponents();
         loadStudentData();
+    }
+
+    public StudentPanel(PanelMediator mediator) {
+        this();
+        this.mediator = mediator;
+    }
+
+    public void setMediator(PanelMediator mediator) {
+        this.mediator = mediator;
     }
 
     private void initComponents() {
@@ -162,15 +173,24 @@ public class StudentPanel extends JPanel {
         buttonPanel.setOpaque(false);
 
         btnAdd = createStyledButton("Add Student", SUCCESS_COLOR, 130, 38);
-        btnAdd.addActionListener((ActionEvent e) -> addStudent());
+        btnAdd.addActionListener((ActionEvent e) -> {
+            addStudent();
+            if (mediator != null) mediator.studentAdded();
+        });
         buttonPanel.add(btnAdd);
 
         btnUpdate = createStyledButton("Update", PRIMARY_COLOR, 100, 38);
-        btnUpdate.addActionListener((ActionEvent e) -> updateStudent());
+        btnUpdate.addActionListener((ActionEvent e) -> {
+            updateStudent();
+            if (mediator != null) mediator.studentUpdated();
+        });
         buttonPanel.add(btnUpdate);
 
         btnDelete = createStyledButton("Delete", DANGER_COLOR, 100, 38);
-        btnDelete.addActionListener((ActionEvent e) -> deleteStudent());
+        btnDelete.addActionListener((ActionEvent e) -> {
+            deleteStudent();
+            if (mediator != null) mediator.studentDeleted();
+        });
         buttonPanel.add(btnDelete);
 
         btnClear = createStyledButton("Clear Form", SECONDARY_COLOR, 120, 38);
@@ -427,6 +447,11 @@ public class StudentPanel extends JPanel {
                     "Database Error", JOptionPane.ERROR_MESSAGE);
         } finally {
             DatabaseConnection.closeResultSet(rs);
+        }
+        tableModel.fireTableDataChanged();
+        if (studentTable != null) {
+            studentTable.revalidate();
+            studentTable.repaint();
         }
     }
 
