@@ -55,4 +55,4 @@ To ensure maintainability and software quality, multiple **Design Patterns** are
 
 ## 🔗 Live Preview / Demo
 
-This is a desktop application, so no web demo is available. However, the source code and instructions to run it locally are provided below.
+This is a desktop application, so no web demo is available. However, the source code is available to download
